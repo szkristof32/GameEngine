@@ -1,0 +1,14 @@
+# Files
+**.sln
+**.vcxproj
+**.filters
+**.user
+**.log
+
+# Directories
+/bin/
+/bin-int/
+.vs/
+WhizzEngine/vendor/**/bin/
+WhizzEngine/vendor/**/bin-int/
+cache/

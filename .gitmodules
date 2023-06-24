@@ -1,0 +1,6 @@
+[submodule "WhizzEngine/vendor/glm"]
+	path = WhizzEngine/vendor/glm
+	url = https://github.com/g-truc/glm
+[submodule "WhizzEngine/vendor/spdlog"]
+	path = WhizzEngine/vendor/spdlog
+	url = https://github.com/gabime/spdlog
