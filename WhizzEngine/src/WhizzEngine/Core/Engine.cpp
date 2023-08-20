@@ -3,8 +3,6 @@
 
 #include "WhizzEngine/Core/Window.h"
 #include "WhizzEngine/Events/EventBus.h"
-#include "WhizzEngine/Rendering/Context.h"
-#include "WhizzEngine/Rendering/RendererAPI.h"
 
 #include "WhizzEngine/Rendering/VertexArray.h"
 
@@ -87,6 +85,16 @@ namespace WhizzEngine {
 		s_RendererAPI.reset();
 		s_Context.reset();
 		s_Window.reset();
+	}
+
+	std::shared_ptr<GraphicsContext> Engine::GetContext()
+	{
+		return s_Context;
+	}
+
+	std::shared_ptr<RendererAPI> Engine::GetRendererAPI()
+	{
+		return s_RendererAPI;
 	}
 
 	void Engine::OnEvent(std::shared_ptr<Event> event)

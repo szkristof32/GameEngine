@@ -11,6 +11,12 @@ namespace WhizzEngine {
 	class RendererAPI
 	{
 	public:
+		enum API
+		{
+			None = 0,
+			OpenGL, Vulkan
+		};
+	public:
 		virtual ~RendererAPI() = default;
 
 		virtual void Clear() const = 0;
@@ -20,7 +26,11 @@ namespace WhizzEngine {
 
 		WZ_CAST_TO(RendererAPI);
 
+		static inline API GetAPI() { return s_API; }
+
 		static std::shared_ptr<RendererAPI> Create();
+	private:
+		static API s_API;
 	};
 
 }

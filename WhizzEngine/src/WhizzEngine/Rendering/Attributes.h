@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WhizzEngine/Core/Assert.h"
+
 #include <vector>
 
 namespace WhizzEngine {

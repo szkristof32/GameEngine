@@ -48,7 +48,8 @@ project "WhizzEngine"
 		
 		links
 		{
-			"opengl32.lib"
+			"opengl32.lib",
+			"vulkan-1.lib"
 		}
 	
 		postbuildcommands
