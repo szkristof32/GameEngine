@@ -32,6 +32,17 @@ namespace WhizzEngine {
 		~VulkanContext();
 
 		virtual void Swap() override {};
+
+		operator VkInstance() const { return m_Instance; }
+		VkInstance GetInstance() const { return m_Instance; }
+		operator VkPhysicalDevice() const { return m_PhysicalDevice; }
+		VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
+		operator VkDevice() const { return m_Device; }
+		VkDevice GetDevice() const { return m_Device; }
+		operator VkSurfaceKHR() const { return m_Surface; }
+		VkSurfaceKHR GetSurface() const { return m_Surface; }
+		operator VkQueue() const { return m_GraphicsQueue; }
+		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
 	private:
 		void CreateInstance();
 		void SetupDebugMessenger();
