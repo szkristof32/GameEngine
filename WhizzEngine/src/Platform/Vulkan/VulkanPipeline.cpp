@@ -51,7 +51,7 @@ namespace WhizzEngine {
 
 	VulkanPipeline::VulkanPipeline(const PipelineInfo& pipelineInfo)
 	{
-		VulkanContext context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Engine::GetContext()->As<VulkanContext>();
 
 		m_Shader = Shader::Create(pipelineInfo.ShaderPath);
 
@@ -177,7 +177,7 @@ namespace WhizzEngine {
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		VulkanContext context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Engine::GetContext()->As<VulkanContext>();
 		vkDestroyPipelineLayout(context, m_PipelineLayout, nullptr);
 		vkDestroyRenderPass(context, m_RenderPass, nullptr);
 		vkDestroyPipeline(context, m_Pipeline, nullptr);

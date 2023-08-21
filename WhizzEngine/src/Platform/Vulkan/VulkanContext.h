@@ -43,6 +43,9 @@ namespace WhizzEngine {
 		VkSurfaceKHR GetSurface() const { return m_Surface; }
 		operator VkQueue() const { return m_GraphicsQueue; }
 		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+
+		SwapchainSupportDetails GetSwapchainSupport() { return QuerySwapchainSupport(m_PhysicalDevice); }
+		QueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
 	private:
 		void CreateInstance();
 		void SetupDebugMessenger();

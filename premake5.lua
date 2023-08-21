@@ -19,7 +19,6 @@ workspace "WhizzEngine"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
-	include "vendor/premake"
 	include "ExternalDependencies.lua"
 	include "WhizzEngine/vendor/glad"
 group ""
