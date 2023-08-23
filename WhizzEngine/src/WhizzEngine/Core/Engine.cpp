@@ -87,6 +87,11 @@ namespace WhizzEngine {
 		s_Window.reset();
 	}
 
+	std::shared_ptr<WhizzEngine::Window> Engine::GetWindow()
+	{
+		return s_Window;
+	}
+
 	std::shared_ptr<GraphicsContext> Engine::GetContext()
 	{
 		return s_Context;

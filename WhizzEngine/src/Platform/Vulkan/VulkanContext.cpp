@@ -44,6 +44,7 @@ namespace WhizzEngine {
 		CreateSurface(windowHandle);
 		PickPhysicalDevice();
 		CreateLogicalDevice();
+		CreateAllocator();
 	}
 
 	VulkanContext::~VulkanContext()
@@ -176,6 +177,15 @@ namespace WhizzEngine {
 
 		vkGetDeviceQueue(m_Device, indices.GraphicsFamily, 0, &m_GraphicsQueue);
 		vkGetDeviceQueue(m_Device, indices.PresentFamily, 0, &m_PresentQueue);
+	}
+
+	void VulkanContext::CreateAllocator()
+	{
+		VmaAllocatorCreateInfo allocatorInfo{};
+		allocatorInfo.physicalDevice = m_PhysicalDevice;
+		allocatorInfo.device = m_Device;
+		allocatorInfo.instance = m_Instance;
+		vmaCreateAllocator(&allocatorInfo, &m_Allocator);
 	}
 
 	bool VulkanContext::IsDeviceSuitable(VkPhysicalDevice device)

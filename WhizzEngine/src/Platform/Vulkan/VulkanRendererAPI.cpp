@@ -10,6 +10,8 @@ namespace WhizzEngine {
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
 		EventBus::RegisterHandler("VulkanRendererAPI", WZ_BIND_EVENT_FN(OnEvent));
+
+		m_Swapchain = Swapchain::Create();
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
@@ -24,7 +26,7 @@ namespace WhizzEngine {
 
 	void VulkanRendererAPI::BindPipeline(std::shared_ptr<Pipeline> pipeline)
 	{
-
+		m_CurrentlyBoundPipeline = pipeline;
 	}
 
 	void VulkanRendererAPI::Draw(uint32_t vertexCount)

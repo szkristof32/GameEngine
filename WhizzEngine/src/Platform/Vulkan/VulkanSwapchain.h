@@ -3,6 +3,7 @@
 #include "WhizzEngine/Rendering/Swapchain.h"
 
 #include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 
 namespace WhizzEngine {
 
@@ -54,8 +55,8 @@ namespace WhizzEngine {
 		VkRenderPass m_RenderPass;
 
 		std::vector<VkImage> m_DepthImages;
-		std::vector<VkDeviceMemory> m_DepthImageMemorys;
 		std::vector<VkImageView> m_DepthImageViews;
+		std::vector<VmaAllocation> m_DepthImageMemorys;
 		std::vector<VkImage> m_SwapchainImages;
 		std::vector<VkImageView> m_SwapchainImageViews;
 

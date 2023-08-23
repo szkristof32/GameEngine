@@ -16,6 +16,16 @@ workspace "WhizzEngine"
 		"MultiProcessorCompile"
 	}
 
+	prebuildcommands
+	{
+		("@rm -rf %{wks.location}x64")
+	}
+
+	postbuildcommands
+	{
+		("@rm -rf %{wks.location}x64")
+	}
+	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"

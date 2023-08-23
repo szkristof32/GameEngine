@@ -36,8 +36,7 @@ namespace WhizzEngine {
 		for (size_t i = 0; i < m_DepthImages.size(); i++)
 		{
 			vkDestroyImageView(context, m_DepthImageViews[i], nullptr);
-			vkDestroyImage(context, m_DepthImages[i], nullptr);
-			vkFreeMemory(context, m_DepthImageMemorys[i], nullptr);
+			vmaDestroyImage(context, m_DepthImages[i], m_DepthImageMemorys[i]);
 		}
 
 		for (auto framebuffer : m_SwapchainFramebuffers)
@@ -57,17 +56,67 @@ namespace WhizzEngine {
 
 	VkFormat VulkanSwapchain::FindDepthFormat()
 	{
+		std::vector<VkFormat> formats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
+		for (VkFormat format : formats)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(Engine::GetContext()->As<VulkanContext>(), format, &props);
 
+			if ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+			{
+				return format;
+			}
+		}
+		WZ_CORE_ASSERT(false, "Failed to find supported format!");
+		return VK_FORMAT_MAX_ENUM;
 	}
 
 	VkResult VulkanSwapchain::AcquireNextImage(uint32_t* imageIndex)
 	{
+		auto& context = Engine::GetContext()->As<VulkanContext>();
 
+		vkWaitForFences(context, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+		VkResult result = vkAcquireNextImageKHR(context, m_Swapchain, std::numeric_limits<uint64_t>::max(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, imageIndex);
+		return result;
 	}
 
 	VkResult VulkanSwapchain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
 	{
+		auto& context = Engine::GetContext()->As<VulkanContext>();
+		if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
+		{
+			vkWaitForFences(context, 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+		}
+		m_ImagesInFlight[*imageIndex] = m_InFlightFences[m_CurrentFrame];
 
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = buffers;
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkResetFences(context, 1, &m_InFlightFences[m_CurrentFrame]);
+		WZ_CORE_ASSERT(vkQueueSubmit(context, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) == VK_SUCCESS, "Failed to submit draw command buffer!");
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &m_Swapchain;
+		presentInfo.pImageIndices = imageIndex;
+
+		VkResult result = vkQueuePresentKHR(context, &presentInfo);
+		WZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to present queue!");
+		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+		return result;
 	}
 
 	bool VulkanSwapchain::CompareSwapFormats(std::shared_ptr<Swapchain> swapchain) const
@@ -192,26 +241,11 @@ namespace WhizzEngine {
 			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageInfo.flags = 0;
 
-			// TODO: create image abstraction
-			WZ_CORE_ASSERT(vkCreateImage(context, &imageInfo, nullptr, &m_DepthImages[i]) == VK_SUCCESS, "Failed to create image!");
+			VmaAllocationCreateInfo allocInfo{};
+			allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+			allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-			VkMemoryRequirements memRequirements;
-			vkGetImageMemoryRequirements(context, m_DepthImages[i], &memRequirements);
-
-			VkMemoryAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
-
-			if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-			{
-				throw std::runtime_error("Failed to allocate image memory!");
-			}
-
-			if (vkBindImageMemory(m_Device, image, imageMemory, 0) != VK_SUCCESS)
-			{
-				throw std::runtime_error("Failed to bind image memory!");
-			}
+			WZ_CORE_ASSERT(vmaCreateImage(context, &imageInfo, &allocInfo, &m_DepthImages[i], &m_DepthImageMemorys[i], nullptr) == VK_SUCCESS, "Failed to create depth images!");
 
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -287,27 +321,95 @@ namespace WhizzEngine {
 
 	void VulkanSwapchain::CreateFramebuffers()
 	{
+		m_SwapchainFramebuffers.resize(GetImageCount());
+		for (size_t i = 0; i < GetImageCount(); i++)
+		{
+			std::array<VkImageView, 2> attachments = { m_SwapchainImageViews[i], m_DepthImageViews[i] };
+			VkExtent2D swapchainExtent = GetSwapchainExtent();
 
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = m_RenderPass;
+			framebufferInfo.attachmentCount = (uint32_t)attachments.size();
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = swapchainExtent.width;
+			framebufferInfo.height = swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			WZ_CORE_ASSERT(vkCreateFramebuffer(Engine::GetContext()->As<VulkanContext>(), &framebufferInfo, nullptr, &m_SwapchainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
+		}
 	}
 
 	void VulkanSwapchain::CreateSyncObjects()
 	{
+		auto& context = Engine::GetContext()->As<VulkanContext>();
 
+		m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+		m_ImagesInFlight.resize(GetImageCount(), VK_NULL_HANDLE);
+
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		VkFenceCreateInfo fenceInfo{};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			WZ_CORE_ASSERT(vkCreateSemaphore(context, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS, "Failed to create synchronisation objects for a frame!");
+			WZ_CORE_ASSERT(vkCreateSemaphore(context, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) == VK_SUCCESS, "Failed to create synchronisation objects for a frame!");
+			WZ_CORE_ASSERT(vkCreateFence(context, &fenceInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS, "Failed to create synchronisation objects for a frame!");
+		}
 	}
 
 	VkSurfaceFormatKHR VulkanSwapchain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
-
+		for (const auto& availableFormat : availableFormats)
+		{
+			if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+			{
+				return availableFormat;
+			}
+		}
+		return availableFormats[0];
 	}
 
 	VkPresentModeKHR VulkanSwapchain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 	{
-
+		for (const auto& availablePresentMode : availablePresentModes)
+		{
+			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+			{
+				return availablePresentMode;
+			}
+		}
+#define WZ_PRESENT_MODE_FIFO 1
+#if WZ_PRESENT_MODE_FIFO
+		for (const auto& availablePresentMode : availablePresentModes)
+		{
+			if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+			{
+				return availablePresentMode;
+			}
+		}
+#endif
+		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
 	VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
-
+		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+		{
+			return capabilities.currentExtent;
+		}
+		else
+		{
+			VkExtent2D actualExtent = { Engine::GetWindow()->GetWidth(), Engine::GetWindow()->GetHeight() };
+			actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+			actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+			return actualExtent;
+		}
 	}
 
 }

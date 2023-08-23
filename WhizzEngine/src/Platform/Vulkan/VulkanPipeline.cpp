@@ -3,6 +3,8 @@
 
 #include "WhizzEngine/Core/Engine.h"
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
+#include "Platform/Vulkan/VulkanSwapchain.h"
 
 namespace WhizzEngine {
 
@@ -52,6 +54,7 @@ namespace WhizzEngine {
 	VulkanPipeline::VulkanPipeline(const PipelineInfo& pipelineInfo)
 	{
 		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& renderer = Engine::GetRendererAPI()->As<VulkanRendererAPI>();
 
 		m_Shader = Shader::Create(pipelineInfo.ShaderPath);
 
@@ -167,7 +170,7 @@ namespace WhizzEngine {
 		createInfo.pDynamicState = &dynamicStateInfo;
 
 		createInfo.layout = m_PipelineLayout;
-		createInfo.renderPass = m_RenderPass;
+		createInfo.renderPass = renderer.GetSwapchain()->As<VulkanSwapchain>().GetRenderPass();
 		createInfo.subpass = 0;
 
 		createInfo.basePipelineIndex = -1;

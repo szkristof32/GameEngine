@@ -6,6 +6,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 
 namespace WhizzEngine {
 
@@ -43,6 +44,8 @@ namespace WhizzEngine {
 		VkSurfaceKHR GetSurface() const { return m_Surface; }
 		operator VkQueue() const { return m_GraphicsQueue; }
 		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+		operator VmaAllocator() const { return m_Allocator; }
+		VmaAllocator GetAllocator() const { return m_Allocator; }
 
 		SwapchainSupportDetails GetSwapchainSupport() { return QuerySwapchainSupport(m_PhysicalDevice); }
 		QueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
@@ -52,6 +55,7 @@ namespace WhizzEngine {
 		void CreateSurface(const void* windowHandle);
 		void PickPhysicalDevice();
 		void CreateLogicalDevice();
+		void CreateAllocator();
 
 		std::vector<const char*> GetRequiredExtensions();
 		bool CheckValidationLayerSupport();
@@ -71,6 +75,7 @@ namespace WhizzEngine {
 		VkSurfaceKHR m_Surface;
 		VkQueue m_GraphicsQueue;
 		VkQueue m_PresentQueue;
+		VmaAllocator m_Allocator;
 
 		const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 		const std::vector<const char*> m_DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

@@ -40,7 +40,8 @@ project "WhizzEngine"
 	links
 	{
 		"Glad",
-		"spdlog"
+		"spdlog",
+		"VulkanMemoryAllocator"
 	}
 	
 	filter "system:windows"
