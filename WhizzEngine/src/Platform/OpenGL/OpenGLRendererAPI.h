@@ -15,7 +15,7 @@ namespace WhizzEngine {
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 
-		virtual void Clear() const override;
+		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) override;
 		virtual void BindPipeline(std::shared_ptr<Pipeline> pipeline) override;
 		virtual void Draw(uint32_t vertexCount) override;
 		virtual void DrawIndexed(std::shared_ptr<VertexArray> vertexArray) override;

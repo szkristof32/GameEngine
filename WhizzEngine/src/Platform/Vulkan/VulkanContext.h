@@ -33,6 +33,7 @@ namespace WhizzEngine {
 		~VulkanContext();
 
 		virtual void Swap() override {};
+		virtual void WaitForIdle() override { vkDeviceWaitIdle(m_Device); }
 
 		operator VkInstance() const { return m_Instance; }
 		VkInstance GetInstance() const { return m_Instance; }

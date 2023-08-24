@@ -15,10 +15,12 @@ namespace WhizzEngine {
 
 	static std::shared_ptr<Pipeline> pipeline;
 	static std::shared_ptr<VertexArray> vao;
+	static std::shared_ptr<VertexBuffer> vbo;
+	static std::shared_ptr<IndexBuffer> ibo;
 
 	void Engine::Init()
 	{
-		s_Window = Window::Create(1600, 900, "FuryEngine");
+		s_Window = Window::Create(1600, 900, "WhizzEngine");
 		s_Context = GraphicsContext::Create(s_Window->GetNativeHandle());
 		s_RendererAPI = RendererAPI::Create();
 
@@ -45,14 +47,14 @@ namespace WhizzEngine {
 		vao = VertexArray::Create();
 		vao->Bind();
 		
-		auto vbo = VertexBuffer::Create();
+		vbo = VertexBuffer::Create();
 		vbo->Bind();
 		vbo->AllocateData(sizeof(vertices));
 		vbo->SetData(sizeof(vertices), vertices);
 		vao->AddVertexBuffer(vbo, attribLayout);
 		vbo->Unbind();
 
-		auto ibo = IndexBuffer::Create();
+		ibo = IndexBuffer::Create();
 		ibo->Bind();
 		ibo->AllocateData(sizeof(indices));
 		ibo->SetData(sizeof(indices), indices);
@@ -69,10 +71,13 @@ namespace WhizzEngine {
 			s_Window->Update();
 			EventBus::Update();
 
-			s_RendererAPI->Clear();
+			s_RendererAPI->BeginFrame();
+			s_RendererAPI->Clear(0.82f, 0.04f, 0.04f, 1.0f);
 
 			s_RendererAPI->BindPipeline(pipeline);
 			s_RendererAPI->DrawIndexed(vao);
+
+			s_RendererAPI->EndFrame();
 
 			s_Context->Swap();
 		}
@@ -80,6 +85,14 @@ namespace WhizzEngine {
 
 	void Engine::CleanUp()
 	{
+		s_Context->WaitForIdle();
+
+		// TODO: remove
+		vao.reset();
+		vbo.reset();
+		ibo.reset();
+		pipeline.reset();
+
 		EventBus::CleanUp();
 
 		s_RendererAPI.reset();
@@ -100,6 +113,11 @@ namespace WhizzEngine {
 	std::shared_ptr<RendererAPI> Engine::GetRendererAPI()
 	{
 		return s_RendererAPI;
+	}
+
+	bool Engine::IsClosing()
+	{
+		return !s_Running;
 	}
 
 	void Engine::OnEvent(std::shared_ptr<Event> event)

@@ -49,6 +49,7 @@ namespace WhizzEngine {
 
 	VulkanContext::~VulkanContext()
 	{
+		vmaDestroyAllocator(m_Allocator);
 		vkDestroyDevice(m_Device, nullptr);
 
 		if (EnableValidationLayers)

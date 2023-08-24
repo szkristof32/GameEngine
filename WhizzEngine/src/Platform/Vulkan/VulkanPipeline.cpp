@@ -187,7 +187,6 @@ namespace WhizzEngine {
 	{
 		auto& context = Engine::GetContext()->As<VulkanContext>();
 		vkDestroyPipelineLayout(context, m_PipelineLayout, nullptr);
-		vkDestroyRenderPass(context, m_RenderPass, nullptr);
 		vkDestroyPipeline(context, m_Pipeline, nullptr);
 	}
 

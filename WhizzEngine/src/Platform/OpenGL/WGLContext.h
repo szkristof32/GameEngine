@@ -13,6 +13,7 @@ namespace WhizzEngine {
 		~WGLContext();
 
 		virtual void Swap() override;
+		virtual void WaitForIdle() override {};
 	private:
 		HWND m_WindowHandle;
 		HDC m_DeviceContext;

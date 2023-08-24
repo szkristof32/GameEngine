@@ -3,6 +3,7 @@
 
 #include "WhizzEngine/Core/Engine.h"
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanRendererAPI.h"
 
 namespace WhizzEngine {
 
@@ -24,8 +25,10 @@ namespace WhizzEngine {
 
 	void VulkanVertexBuffer::Bind() const
 	{
+		if (!m_Buffer) return;
 		VkDeviceSize offset = 0;
-		vkCmdBindVertexBuffers(nullptr, 0, 1, &m_Buffer, &offset); // TODO: command buffers
+		auto& cmdBuffer = Engine::GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
+		vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &m_Buffer, &offset);
 	}
 
 	void VulkanVertexBuffer::Unbind() const
@@ -77,8 +80,10 @@ namespace WhizzEngine {
 
 	void VulkanIndexBuffer::Bind() const
 	{
+		if (!m_Buffer) return;
 		VkDeviceSize offset = 0;
-		vkCmdBindIndexBuffer(nullptr, m_Buffer, offset, VK_INDEX_TYPE_UINT32); // TODO: command buffers
+		auto& cmdBuffer = Engine::GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
+		vkCmdBindIndexBuffer(cmdBuffer, m_Buffer, offset, VK_INDEX_TYPE_UINT32);
 	}
 
 	void VulkanIndexBuffer::Unbind() const

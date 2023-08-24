@@ -96,7 +96,7 @@ namespace WhizzEngine {
 
 	OpenGLShader::~OpenGLShader()
 	{
-		glDeleteShader(m_RendererID);
+		glDeleteProgram(m_RendererID);
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)

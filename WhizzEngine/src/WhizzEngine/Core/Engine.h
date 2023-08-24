@@ -18,6 +18,7 @@ namespace WhizzEngine {
 		static std::shared_ptr<Window> GetWindow();
 		static std::shared_ptr<GraphicsContext> GetContext();
 		static std::shared_ptr<RendererAPI> GetRendererAPI();
+		static bool IsClosing();
 	private:
 		static void OnEvent(std::shared_ptr<Event> event);
 		static bool OnWindowClose(WindowCloseEvent& event);

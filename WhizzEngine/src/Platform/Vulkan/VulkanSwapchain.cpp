@@ -114,14 +114,13 @@ namespace WhizzEngine {
 		presentInfo.pImageIndices = imageIndex;
 
 		VkResult result = vkQueuePresentKHR(context, &presentInfo);
-		WZ_CORE_ASSERT(result == VK_SUCCESS, "Failed to present queue!");
 		m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 		return result;
 	}
 
 	bool VulkanSwapchain::CompareSwapFormats(std::shared_ptr<Swapchain> swapchain) const
 	{
-		VulkanSwapchain other = swapchain->As<VulkanSwapchain>();
+		VulkanSwapchain& other = swapchain->As<VulkanSwapchain>();
 		return other.m_SwapchainDepthFormat == m_SwapchainDepthFormat && other.m_SwapchainImageFormat == m_SwapchainImageFormat;
 	}
 

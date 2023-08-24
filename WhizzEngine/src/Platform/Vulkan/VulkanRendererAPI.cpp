@@ -6,6 +6,7 @@
 
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanContext.h"
+#include "Platform/Vulkan/VulkanPipeline.h"
 
 #include <vulkan/vulkan.h>
 
@@ -52,6 +53,10 @@ namespace WhizzEngine {
 		m_CommandBuffers[m_CurrentFrameIndex].End();
 
 		auto result = m_Swapchain->As<VulkanSwapchain>().SubmitCommandBuffers((const VkCommandBuffer*)&m_CommandBuffers[m_CurrentFrameIndex], &m_CurrentImageIndex);
+
+		if (Engine::IsClosing())
+			return;
+
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
 			RecreateSwapchain();
@@ -65,24 +70,30 @@ namespace WhizzEngine {
 		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % Swapchain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void VulkanRendererAPI::Clear() const
+	void VulkanRendererAPI::Clear(float r, float g, float b, float a)
 	{
-
+		m_ClearColour = glm::vec4{ r, g, b, a };
 	}
 
 	void VulkanRendererAPI::BindPipeline(std::shared_ptr<Pipeline> pipeline)
 	{
 		m_CurrentlyBoundPipeline = pipeline;
+		vkCmdBindPipeline(m_CommandBuffers[m_CurrentFrameIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->As<VulkanPipeline>());
 	}
 
 	void VulkanRendererAPI::Draw(uint32_t vertexCount)
 	{
-
+		vkCmdDraw(m_CommandBuffers[m_CurrentFrameIndex], vertexCount, 1, 0, 0);
 	}
 
 	void VulkanRendererAPI::DrawIndexed(std::shared_ptr<VertexArray> vertexArray)
 	{
-
+		for (auto vertexBuffer : vertexArray->GetVertexBuffers())
+		{
+			vertexBuffer->Bind();
+		}
+		vertexArray->GetIndexBuffer()->Bind();
+		vkCmdDrawIndexed(m_CommandBuffers[m_CurrentFrameIndex], vertexArray->GetIndexBuffer()->GetDataSize() / sizeof(uint32_t), 1, 0, 0, 0);
 	}
 
 	void VulkanRendererAPI::OnEvent(std::shared_ptr<Event> event)
@@ -133,7 +144,7 @@ namespace WhizzEngine {
 		renderPassInfo.renderArea.extent = m_Swapchain->As<VulkanSwapchain>().GetSwapchainExtent();
 
 		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+		clearValues[0].color = { m_ClearColour.r, m_ClearColour.g, m_ClearColour.b, m_ClearColour.a };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 		renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
 		renderPassInfo.pClearValues = clearValues.data();

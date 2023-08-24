@@ -14,6 +14,8 @@ namespace WhizzEngine {
 
 		virtual std::shared_ptr<Shader> GetShader() const { return m_Shader; }
 		virtual const AttributeLayout& GetAttributeLayout() const { return m_AttributeLayout; }
+
+		operator VkPipeline() const { return m_Pipeline; }
 	private:
 		VkPipeline m_Pipeline;
 		VkPipelineLayout m_PipelineLayout;
