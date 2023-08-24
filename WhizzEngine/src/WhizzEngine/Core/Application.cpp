@@ -1,19 +1,13 @@
 #include "pch.h"
 #include "Application.h"
 
-#include "WhizzEngine/Core/Window.h"
 #include "WhizzEngine/Events/EventBus.h"
-
-#include "WhizzEngine/Rendering/VertexArray.h"
 
 namespace WhizzEngine {
 
-	Application* Application::s_Instance = nullptr;
+	static constexpr float MS_PER_UPDATE = 1.0f / 60.0f;
 
-	static std::shared_ptr<Pipeline> pipeline;
-	static std::shared_ptr<VertexArray> vao;
-	static std::shared_ptr<VertexBuffer> vbo;
-	static std::shared_ptr<IndexBuffer> ibo;
+	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
@@ -25,54 +19,11 @@ namespace WhizzEngine {
 		m_RendererAPI = RendererAPI::Create();
 
 		EventBus::RegisterHandler("Engine", WZ_BIND_EVENT_FN(OnEvent));
-
-		// TOOD: test initialisation
-		AttributeLayout attribLayout = { { DataType::Float3 } };
-		PipelineInfo pipelineInfo{};
-		pipelineInfo.ShaderPath = "assets/shaders/testShader.glsl";
-		pipelineInfo.AttribLayout = attribLayout;
-		pipeline = Pipeline::Create(pipelineInfo);
-
-		float vertices[] = {
-			-0.5f, 0.5f, 0.0f,
-			-0.5f, -0.5f, 0.0f,
-			0.5f, 0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f
-		};
-		int indices[] = {
-			0, 1, 2,
-			2, 1, 3
-		};
-
-		vao = VertexArray::Create();
-		vao->Bind();
-		
-		vbo = VertexBuffer::Create();
-		vbo->Bind();
-		vbo->AllocateData(sizeof(vertices));
-		vbo->SetData(sizeof(vertices), vertices);
-		vao->AddVertexBuffer(vbo, attribLayout);
-		vbo->Unbind();
-
-		ibo = IndexBuffer::Create();
-		ibo->Bind();
-		ibo->AllocateData(sizeof(indices));
-		ibo->SetData(sizeof(indices), indices);
-		vao->SetIndexBuffer(ibo);
-		ibo->Unbind();
-
-		vao->Unbind();
 	}
 
 	Application::~Application()
 	{
 		m_Context->WaitForIdle();
-
-		// TODO: remove
-		vao.reset();
-		vbo.reset();
-		ibo.reset();
-		pipeline.reset();
 
 		EventBus::CleanUp();
 	}
@@ -81,16 +32,18 @@ namespace WhizzEngine {
 	{
 		while (m_Running)
 		{
-			m_Window->Update();
-			EventBus::Update();
+			float currentTime = Time::GetTime();
+			Timestep delta = currentTime - m_LastFrameTime;
+			m_LastFrameTime = currentTime;
+			m_Lag += delta;
 
-			m_RendererAPI->BeginFrame();
-			m_RendererAPI->Clear(0.82f, 0.04f, 0.04f, 1.0f);
+			while (m_Lag >= MS_PER_UPDATE)
+			{
+				m_Window->Update();
+				EventBus::Update();
 
-			m_RendererAPI->BindPipeline(pipeline);
-			m_RendererAPI->DrawIndexed(vao);
-
-			m_RendererAPI->EndFrame();
+				m_Lag -= MS_PER_UPDATE;
+			}
 
 			m_Context->Swap();
 		}

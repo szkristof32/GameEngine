@@ -2,8 +2,6 @@
 
 #include "WhizzEngine/Core/Window.h"
 
-#include <Windows.h>
-
 namespace WhizzEngine {
 
 	class WindowsWindow : public Window
@@ -19,7 +17,7 @@ namespace WhizzEngine {
 		virtual const void* GetNativeHandle() const override { return m_Window; }
 		virtual void WaitForEvents() const override;
 	private:
-		HWND m_Window;
+		const void* m_Window;
 		uint32_t m_Width;
 		uint32_t m_Height;
 	};

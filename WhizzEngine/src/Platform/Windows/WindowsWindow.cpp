@@ -1,10 +1,13 @@
 #include "pch.h"
 #include "WindowsWindow.h"
 
+#ifdef WZ_PLATFORM_WINDOWS
 #include "WhizzEngine/Events/EventBus.h"
 #include "WhizzEngine/Events/ApplicationEvent.h"
 #include "WhizzEngine/Events/KeyEvent.h"
 #include "WhizzEngine/Events/MouseEvent.h"
+
+#include "WhizzEngine/Core/Timing.h"
 
 #include <windowsx.h>
 
@@ -33,7 +36,7 @@ namespace WhizzEngine {
 		m_Window = CreateWindowEx(0, CLASS_NAME, w_title.c_str(), WS_OVERLAPPEDWINDOW, (displayWidth - width) / 2, (displayHeight - height) / 2, width, height, nullptr, nullptr, GetModuleHandle(NULL), nullptr);
 		WZ_CORE_ASSERT(m_Window, "Failed to create window!");
 
-		ShowWindow(m_Window, SW_SHOW);
+		ShowWindow((HWND)m_Window, SW_SHOW);
 	}
 
 	WindowsWindow::~WindowsWindow()
@@ -154,4 +157,35 @@ namespace WhizzEngine {
 		return DefWindowProc(window, message, wparam, lparam);
 	}
 
+	float Time::GetTime()
+	{
+		uint64_t time, frequency;
+		QueryPerformanceCounter((LARGE_INTEGER*)&time);
+		QueryPerformanceFrequency((LARGE_INTEGER*)&frequency);
+		return (float)time / (float)frequency;
+	}
+
 }
+#else
+namespace WhizzEngine {
+
+	WindowsWindow::WindowsWindow(uint32_t width, uint32_t height, const std::string& title)
+	{
+		WZ_CORE_ASSERT("Win32 isn't supported on this platform!");
+	}
+	WindowsWindow::~WindowsWindow()
+	{
+	}
+
+	void WindowsWindow::Update()
+	{
+		WZ_CORE_ASSERT("Win32 isn't supported on this platform!");
+	}
+
+	void WindowsWindow::WaitForEvents() const 
+	{
+		WZ_CORE_ASSERT("Win32 isn't supported on this platform!");
+	}
+
+}
+#endif

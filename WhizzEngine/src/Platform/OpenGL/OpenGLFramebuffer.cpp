@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "OpenGLFramebuffer.h"
 
+#include "WhizzEngine/Core/Application.h"
+
 #include <glad/glad.h>
 
 namespace WhizzEngine {
@@ -59,10 +61,12 @@ namespace WhizzEngine {
 
 	void OpenGLFramebuffer::BlitToScreen()
 	{
+		auto window = Application::Get().GetWindow();
+
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);
 		glDrawBuffer(GL_BACK);
-		glBlitFramebuffer(0, 0, m_Width, m_Height, 0, 0, 1600, 900, GL_COLOR_BUFFER_BIT, GL_NEAREST); // TODO check real window size
+		glBlitFramebuffer(0, 0, m_Width, m_Height, 0, 0, window->GetWidth(), window->GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 

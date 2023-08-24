@@ -2,22 +2,20 @@
 
 #include "WhizzEngine/Rendering/Context.h"
 
-#include <Windows.h>
-
 namespace WhizzEngine {
 
 	class WGLContext : public GraphicsContext
 	{
 	public:
-		WGLContext(HWND windowHandle);
+		WGLContext(const void* windowHandle);
 		~WGLContext();
 
 		virtual void Swap() override;
 		virtual void WaitForIdle() override {};
 	private:
-		HWND m_WindowHandle;
-		HDC m_DeviceContext;
-		HGLRC m_RenderingContext;
+		const void* m_WindowHandle;
+		const void* m_DeviceContext;
+		const void* m_RenderingContext;
 	};
 
 }

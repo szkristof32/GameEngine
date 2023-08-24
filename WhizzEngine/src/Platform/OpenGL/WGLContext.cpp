@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "WGLContext.h"
 
+#ifdef WZ_PLATFORM_WINDOWS
 #include <glad/glad.h>
 
 namespace WhizzEngine {
@@ -17,7 +18,7 @@ namespace WhizzEngine {
 	}
 
 
-	WGLContext::WGLContext(HWND windowHandle)
+	WGLContext::WGLContext(const void* windowHandle)
 		: m_WindowHandle(windowHandle)
 	{
 		PIXELFORMATDESCRIPTOR pfd = {
@@ -40,12 +41,12 @@ namespace WhizzEngine {
 			0,
 			0, 0, 0
 		};
-		m_DeviceContext = GetDC(m_WindowHandle);
-		int pixelFormat = ChoosePixelFormat(m_DeviceContext, &pfd);
-		SetPixelFormat(m_DeviceContext, pixelFormat, &pfd);
+		m_DeviceContext = GetDC((HWND)m_WindowHandle);
+		int pixelFormat = ChoosePixelFormat((HDC)m_DeviceContext, &pfd);
+		SetPixelFormat((HDC)m_DeviceContext, pixelFormat, &pfd);
 
-		m_RenderingContext = wglCreateContext(m_DeviceContext);
-		wglMakeCurrent(m_DeviceContext, m_RenderingContext);
+		m_RenderingContext = wglCreateContext((HDC)m_DeviceContext);
+		wglMakeCurrent((HDC)m_DeviceContext, (HGLRC)m_RenderingContext);
 		gladLoadGL();
 
 #ifdef WZ_DEBUG
@@ -64,13 +65,32 @@ namespace WhizzEngine {
 
 	WGLContext::~WGLContext()
 	{
-		ReleaseDC(m_WindowHandle, m_DeviceContext);
-		wglDeleteContext(m_RenderingContext);
+		ReleaseDC((HWND)m_WindowHandle, (HDC)m_DeviceContext);
+		wglDeleteContext((HGLRC)m_RenderingContext);
 	}
 
 	void WGLContext::Swap()
 	{
-		SwapBuffers(m_DeviceContext);
+		SwapBuffers((HDC)m_DeviceContext);
 	}
 
 }
+#else
+namespace WhizzEngine {
+
+	WGLContext::WGLContext(const void* windowHandle)
+	{
+		WZ_CORE_ASSERT("WGL isn't supported on this platform!");
+	}
+
+	WGLContext::~WGLContext()
+	{
+	}
+
+	void WGLContext::Swap()
+	{
+		WZ_CORE_ASSERT("WGL isn't supported on this platform!");
+	}
+
+}
+#endif

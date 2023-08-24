@@ -5,6 +5,7 @@
 #include "WhizzEngine/Events/ApplicationEvent.h"
 #include "WhizzEngine/Rendering/Context.h"
 #include "WhizzEngine/Rendering/RendererAPI.h"
+#include "WhizzEngine/Core/LayerStack.h"
 
 namespace WhizzEngine {
 
@@ -15,6 +16,9 @@ namespace WhizzEngine {
 		~Application();
 
 		void Run();
+
+		void PushLayer(Layer* layer) { m_LayerStack.PushLayer(layer); }
+		void PushOverlay(Layer* overlay) { m_LayerStack.PushOverlay(overlay); }
 
 		static Application& Get() { return *s_Instance; }
 
@@ -30,6 +34,9 @@ namespace WhizzEngine {
 		std::shared_ptr<Window> m_Window;
 		std::shared_ptr<GraphicsContext> m_Context;
 		std::shared_ptr<RendererAPI> m_RendererAPI;
+		LayerStack m_LayerStack;
+		float m_LastFrameTime = 0.0f;
+		float m_Lag = 0.0f;
 
 		static Application* s_Instance;
 	};
