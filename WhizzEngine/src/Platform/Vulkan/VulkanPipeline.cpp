@@ -5,6 +5,7 @@
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
+#include "Platform/Vulkan/VulkanShader.h"
 
 namespace WhizzEngine {
 
@@ -58,13 +59,17 @@ namespace WhizzEngine {
 
 		m_Shader = Shader::Create(pipelineInfo.ShaderPath);
 
-		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
-		for (uint32_t i = 0; i < shaderStages.size(); i++)
+		const auto& shaderModules = m_Shader->As<VulkanShader>().GetShaderModules();
+		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+		shaderStages.resize(shaderModules.size());
+		uint32_t i = 0;
+		for (auto&& [stage, shaderModule] : shaderModules)
 		{
 			shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			shaderStages[i].stage = i == 0 ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
-			shaderStages[i].module = nullptr; // TODO
+			shaderStages[i].stage = stage;
+			shaderStages[i].module = shaderModule;
 			shaderStages[i].pName = "main";
+			i++;
 		}
 
 		auto attributeDescriptions = Utils::GetAttributeDescriptions(pipelineInfo.AttribLayout);
