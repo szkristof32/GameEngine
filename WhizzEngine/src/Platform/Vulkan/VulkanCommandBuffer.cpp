@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanCommandBuffer.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "Platform/Vulkan/VulkanContext.h"
 
 namespace WhizzEngine {
@@ -14,12 +14,12 @@ namespace WhizzEngine {
 		allocInfo.commandBufferCount = 1;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-		WZ_CORE_ASSERT(vkAllocateCommandBuffers(Engine::GetContext()->As<VulkanContext>(), &allocInfo, &m_CommandBuffer) == VK_SUCCESS, "Failed to allocate command buffer!");
+		WZ_CORE_ASSERT(vkAllocateCommandBuffers(Application::Get().GetContext()->As<VulkanContext>(), &allocInfo, &m_CommandBuffer) == VK_SUCCESS, "Failed to allocate command buffer!");
 	}
 
 	void VulkanCommandBuffer::Reset() const
 	{
-		vkDeviceWaitIdle(Engine::GetContext()->As<VulkanContext>());
+		vkDeviceWaitIdle(Application::Get().GetContext()->As<VulkanContext>());
 		vkResetCommandBuffer(m_CommandBuffer, 0);
 	}
 
@@ -50,22 +50,22 @@ namespace WhizzEngine {
 		submitInfo.signalSemaphoreCount = (uint32_t)submit.SignalSemaphores.size();
 		submitInfo.pSignalSemaphores = submit.SignalSemaphores.data();
 
-		WZ_CORE_ASSERT(vkQueueSubmit(Engine::GetContext()->As<VulkanContext>(), 1, &submitInfo, submit.Fence) == VK_SUCCESS, "Failed to submit draw command buffer!");
+		WZ_CORE_ASSERT(vkQueueSubmit(Application::Get().GetContext()->As<VulkanContext>(), 1, &submitInfo, submit.Fence) == VK_SUCCESS, "Failed to submit draw command buffer!");
 	}
 
 	VulkanCommandPool::VulkanCommandPool()
 	{
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.queueFamilyIndex = Engine::GetContext()->As<VulkanContext>().FindPhysicalQueueFamilies().GraphicsFamily;
+		poolInfo.queueFamilyIndex = Application::Get().GetContext()->As<VulkanContext>().FindPhysicalQueueFamilies().GraphicsFamily;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-		WZ_CORE_ASSERT(vkCreateCommandPool(Engine::GetContext()->As<VulkanContext>(), &poolInfo, nullptr, &m_CommandPool) == VK_SUCCESS, "Failed to create command pool!");
+		WZ_CORE_ASSERT(vkCreateCommandPool(Application::Get().GetContext()->As<VulkanContext>(), &poolInfo, nullptr, &m_CommandPool) == VK_SUCCESS, "Failed to create command pool!");
 	}
 
 	VulkanCommandPool::~VulkanCommandPool()
 	{
-		vkDestroyCommandPool(Engine::GetContext()->As<VulkanContext>(), m_CommandPool, nullptr);
+		vkDestroyCommandPool(Application::Get().GetContext()->As<VulkanContext>(), m_CommandPool, nullptr);
 	}
 
 	VulkanCommandBuffer VulkanCommandPool::AllocateBuffer()

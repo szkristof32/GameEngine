@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Engine.h"
+#include "Application.h"
 
 #include "WhizzEngine/Core/Window.h"
 #include "WhizzEngine/Events/EventBus.h"
@@ -8,23 +8,23 @@
 
 namespace WhizzEngine {
 
-	static bool s_Running = true;
-	static std::shared_ptr<Window> s_Window;
-	static std::shared_ptr<GraphicsContext> s_Context;
-	static std::shared_ptr<RendererAPI> s_RendererAPI;
+	Application* Application::s_Instance = nullptr;
 
 	static std::shared_ptr<Pipeline> pipeline;
 	static std::shared_ptr<VertexArray> vao;
 	static std::shared_ptr<VertexBuffer> vbo;
 	static std::shared_ptr<IndexBuffer> ibo;
 
-	void Engine::Init()
+	Application::Application()
 	{
-		s_Window = Window::Create(1600, 900, "WhizzEngine");
-		s_Context = GraphicsContext::Create(s_Window->GetNativeHandle());
-		s_RendererAPI = RendererAPI::Create();
+		WZ_CORE_ASSERT(!s_Instance, "Cannot have more than one application instance at the same time!");
+		s_Instance = this;
 
-		EventBus::RegisterHandler("Engine", OnEvent);
+		m_Window = Window::Create(1600, 900, "WhizzEngine");
+		m_Context = GraphicsContext::Create(m_Window->GetNativeHandle());
+		m_RendererAPI = RendererAPI::Create();
+
+		EventBus::RegisterHandler("Engine", WZ_BIND_EVENT_FN(OnEvent));
 
 		// TOOD: test initialisation
 		AttributeLayout attribLayout = { { DataType::Float3 } };
@@ -64,28 +64,9 @@ namespace WhizzEngine {
 		vao->Unbind();
 	}
 
-	void Engine::Run()
+	Application::~Application()
 	{
-		while (s_Running)
-		{
-			s_Window->Update();
-			EventBus::Update();
-
-			s_RendererAPI->BeginFrame();
-			s_RendererAPI->Clear(0.82f, 0.04f, 0.04f, 1.0f);
-
-			s_RendererAPI->BindPipeline(pipeline);
-			s_RendererAPI->DrawIndexed(vao);
-
-			s_RendererAPI->EndFrame();
-
-			s_Context->Swap();
-		}
-	}
-
-	void Engine::CleanUp()
-	{
-		s_Context->WaitForIdle();
+		m_Context->WaitForIdle();
 
 		// TODO: remove
 		vao.reset();
@@ -94,41 +75,36 @@ namespace WhizzEngine {
 		pipeline.reset();
 
 		EventBus::CleanUp();
-
-		s_RendererAPI.reset();
-		s_Context.reset();
-		s_Window.reset();
 	}
 
-	std::shared_ptr<WhizzEngine::Window> Engine::GetWindow()
+	void Application::Run()
 	{
-		return s_Window;
+		while (m_Running)
+		{
+			m_Window->Update();
+			EventBus::Update();
+
+			m_RendererAPI->BeginFrame();
+			m_RendererAPI->Clear(0.82f, 0.04f, 0.04f, 1.0f);
+
+			m_RendererAPI->BindPipeline(pipeline);
+			m_RendererAPI->DrawIndexed(vao);
+
+			m_RendererAPI->EndFrame();
+
+			m_Context->Swap();
+		}
 	}
 
-	std::shared_ptr<GraphicsContext> Engine::GetContext()
-	{
-		return s_Context;
-	}
-
-	std::shared_ptr<RendererAPI> Engine::GetRendererAPI()
-	{
-		return s_RendererAPI;
-	}
-
-	bool Engine::IsClosing()
-	{
-		return !s_Running;
-	}
-
-	void Engine::OnEvent(std::shared_ptr<Event> event)
+	void Application::OnEvent(std::shared_ptr<Event> event)
 	{
 		EventDispatcher dispatcher(*event);
-		dispatcher.Dispatch<WindowCloseEvent>(OnWindowClose);
+		dispatcher.Dispatch<WindowCloseEvent>(WZ_BIND_EVENT_FN(OnWindowClose));
 	}
 
-	bool Engine::OnWindowClose(WindowCloseEvent& event)
+	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
-		s_Running = false;
+		m_Running = false;
 		return true;
 	}
 

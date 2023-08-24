@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanShader.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "Platform/Vulkan/VulkanContext.h"
 
 #include <shaderc/shaderc.hpp>
@@ -97,7 +97,7 @@ namespace WhizzEngine {
 
 	VulkanShader::~VulkanShader()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 
 		for (auto&& [stage, shaderModule] : m_ShaderStages)
 		{
@@ -229,7 +229,7 @@ namespace WhizzEngine {
 			createInfo.pCode = spirv.data();
 
 			VkShaderModule shaderModule;
-			WZ_CORE_ASSERT(vkCreateShaderModule(Engine::GetContext()->As<VulkanContext>(), &createInfo, nullptr, &shaderModule) == VK_SUCCESS, "Failed to create shader module!");
+			WZ_CORE_ASSERT(vkCreateShaderModule(Application::Get().GetContext()->As<VulkanContext>(), &createInfo, nullptr, &shaderModule) == VK_SUCCESS, "Failed to create shader module!");
 			m_ShaderStages[stage] = shaderModule;
 		}
 	}

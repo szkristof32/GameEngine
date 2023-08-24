@@ -53,11 +53,6 @@ project "WhizzEngine"
 			"vulkan-1.lib"
 		}
 	
-		postbuildcommands
-		{
-			("rmdir /s /q %{wks.location}x64")
-		}
-	
 	filter "configurations:Debug"
 		defines "WZ_DEBUG"
 		runtime "Debug"

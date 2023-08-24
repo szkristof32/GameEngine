@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanPipeline.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
@@ -54,8 +54,8 @@ namespace WhizzEngine {
 
 	VulkanPipeline::VulkanPipeline(const PipelineInfo& pipelineInfo)
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
-		auto& renderer = Engine::GetRendererAPI()->As<VulkanRendererAPI>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
+		auto& renderer = Application::Get().GetRendererAPI()->As<VulkanRendererAPI>();
 
 		m_Shader = Shader::Create(pipelineInfo.ShaderPath);
 
@@ -185,7 +185,7 @@ namespace WhizzEngine {
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 		vkDestroyPipelineLayout(context, m_PipelineLayout, nullptr);
 		vkDestroyPipeline(context, m_Pipeline, nullptr);
 	}

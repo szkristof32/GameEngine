@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanRendererAPI.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "WhizzEngine/Events/EventBus.h"
 
 #include "Platform/Vulkan/VulkanSwapchain.h"
@@ -54,7 +54,7 @@ namespace WhizzEngine {
 
 		auto result = m_Swapchain->As<VulkanSwapchain>().SubmitCommandBuffers((const VkCommandBuffer*)&m_CommandBuffers[m_CurrentFrameIndex], &m_CurrentImageIndex);
 
-		if (Engine::IsClosing())
+		if (Application::Get().IsClosing())
 			return;
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -110,8 +110,8 @@ namespace WhizzEngine {
 
 	void VulkanRendererAPI::RecreateSwapchain()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
-		auto& window = Engine::GetWindow();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
+		auto& window = Application::Get().GetWindow();
 
 		VkExtent2D extent = { window->GetWidth(), window->GetHeight() };
 		while (extent.width == 0 || extent.height == 0)

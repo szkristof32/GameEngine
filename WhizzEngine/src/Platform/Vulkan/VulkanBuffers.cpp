@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanBuffers.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "Platform/Vulkan/VulkanContext.h"
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 
@@ -19,7 +19,7 @@ namespace WhizzEngine {
 
 	void VulkanVertexBuffer::Delete()
 	{
-		vmaDestroyBuffer(Engine::GetContext()->As<VulkanContext>(), m_Buffer, m_Memory);
+		vmaDestroyBuffer(Application::Get().GetContext()->As<VulkanContext>(), m_Buffer, m_Memory);
 		m_Buffer = nullptr;
 	}
 
@@ -27,7 +27,7 @@ namespace WhizzEngine {
 	{
 		if (!m_Buffer) return;
 		VkDeviceSize offset = 0;
-		auto& cmdBuffer = Engine::GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
+		auto& cmdBuffer = Application::Get().GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
 		vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &m_Buffer, &offset);
 	}
 
@@ -47,14 +47,14 @@ namespace WhizzEngine {
 		VmaAllocationCreateInfo allocInfo{};
 		allocInfo.usage = m_MemoryUsage;
 
-		WZ_CORE_ASSERT(vmaCreateBuffer(Engine::GetContext()->As<VulkanContext>(), &bufferInfo, &allocInfo, &m_Buffer, &m_Memory, nullptr) == VK_SUCCESS, "Failed to create buffer!");
+		WZ_CORE_ASSERT(vmaCreateBuffer(Application::Get().GetContext()->As<VulkanContext>(), &bufferInfo, &allocInfo, &m_Buffer, &m_Memory, nullptr) == VK_SUCCESS, "Failed to create buffer!");
 	}
 
 	void VulkanVertexBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
 	{
 		if (!m_Memory) AllocateData(size);
 
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 		void* mapped;
 		vmaMapMemory(context, m_Memory, &mapped);
 		memcpy(mapped, data, size);
@@ -74,7 +74,7 @@ namespace WhizzEngine {
 
 	void VulkanIndexBuffer::Delete()
 	{
-		vmaDestroyBuffer(Engine::GetContext()->As<VulkanContext>(), m_Buffer, m_Memory);
+		vmaDestroyBuffer(Application::Get().GetContext()->As<VulkanContext>(), m_Buffer, m_Memory);
 		m_Buffer = nullptr;
 	}
 
@@ -82,7 +82,7 @@ namespace WhizzEngine {
 	{
 		if (!m_Buffer) return;
 		VkDeviceSize offset = 0;
-		auto& cmdBuffer = Engine::GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
+		auto& cmdBuffer = Application::Get().GetRendererAPI()->As<VulkanRendererAPI>().GetCurrentCommandBuffer();
 		vkCmdBindIndexBuffer(cmdBuffer, m_Buffer, offset, VK_INDEX_TYPE_UINT32);
 	}
 
@@ -102,14 +102,14 @@ namespace WhizzEngine {
 		VmaAllocationCreateInfo allocInfo{};
 		allocInfo.usage = m_MemoryUsage;
 
-		WZ_CORE_ASSERT(vmaCreateBuffer(Engine::GetContext()->As<VulkanContext>(), &bufferInfo, &allocInfo, &m_Buffer, &m_Memory, nullptr) == VK_SUCCESS, "Failed to create buffer!");
+		WZ_CORE_ASSERT(vmaCreateBuffer(Application::Get().GetContext()->As<VulkanContext>(), &bufferInfo, &allocInfo, &m_Buffer, &m_Memory, nullptr) == VK_SUCCESS, "Failed to create buffer!");
 	}
 
 	void VulkanIndexBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
 	{
 		if (!m_Memory) AllocateData(size);
 
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 		void* mapped;
 		vmaMapMemory(context, m_Memory, &mapped);
 		memcpy(mapped, data, size);

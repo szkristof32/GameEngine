@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanSwapchain.h"
 
-#include "WhizzEngine/Core/Engine.h"
+#include "WhizzEngine/Core/Application.h"
 #include "Platform/Vulkan/VulkanContext.h"
 
 namespace WhizzEngine {
@@ -19,7 +19,7 @@ namespace WhizzEngine {
 
 	VulkanSwapchain::~VulkanSwapchain()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 
 		for (auto imageView : m_SwapchainImageViews)
 		{
@@ -60,7 +60,7 @@ namespace WhizzEngine {
 		for (VkFormat format : formats)
 		{
 			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties(Engine::GetContext()->As<VulkanContext>(), format, &props);
+			vkGetPhysicalDeviceFormatProperties(Application::Get().GetContext()->As<VulkanContext>(), format, &props);
 
 			if ((props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
 			{
@@ -73,7 +73,7 @@ namespace WhizzEngine {
 
 	VkResult VulkanSwapchain::AcquireNextImage(uint32_t* imageIndex)
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 
 		vkWaitForFences(context, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 		VkResult result = vkAcquireNextImageKHR(context, m_Swapchain, std::numeric_limits<uint64_t>::max(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, imageIndex);
@@ -82,7 +82,7 @@ namespace WhizzEngine {
 
 	VkResult VulkanSwapchain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 		if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
 		{
 			vkWaitForFences(context, 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -136,7 +136,7 @@ namespace WhizzEngine {
 
 	void VulkanSwapchain::CreateSwapchain()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 		SwapchainSupportDetails swapchainSupport = context.GetSwapchainSupport();
 
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapchainSupport.Formats);
@@ -206,13 +206,13 @@ namespace WhizzEngine {
 			viewInfo.subresourceRange.baseArrayLayer = 0;
 			viewInfo.subresourceRange.layerCount = 1;
 
-			WZ_CORE_ASSERT(vkCreateImageView(Engine::GetContext()->As<VulkanContext>(), &viewInfo, nullptr, &m_SwapchainImageViews[i]) == VK_SUCCESS, "Failed to create texture image view!");
+			WZ_CORE_ASSERT(vkCreateImageView(Application::Get().GetContext()->As<VulkanContext>(), &viewInfo, nullptr, &m_SwapchainImageViews[i]) == VK_SUCCESS, "Failed to create texture image view!");
 		}
 	}
 
 	void VulkanSwapchain::CreateDepthResources()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 
 		VkFormat depthFormat = FindDepthFormat();
 		m_SwapchainDepthFormat = depthFormat;
@@ -315,7 +315,7 @@ namespace WhizzEngine {
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		WZ_CORE_ASSERT(vkCreateRenderPass(Engine::GetContext()->As<VulkanContext>(), &renderPassInfo, nullptr, &m_RenderPass) == VK_SUCCESS, "Failed to create render pass!");
+		WZ_CORE_ASSERT(vkCreateRenderPass(Application::Get().GetContext()->As<VulkanContext>(), &renderPassInfo, nullptr, &m_RenderPass) == VK_SUCCESS, "Failed to create render pass!");
 	}
 
 	void VulkanSwapchain::CreateFramebuffers()
@@ -335,13 +335,13 @@ namespace WhizzEngine {
 			framebufferInfo.height = swapchainExtent.height;
 			framebufferInfo.layers = 1;
 
-			WZ_CORE_ASSERT(vkCreateFramebuffer(Engine::GetContext()->As<VulkanContext>(), &framebufferInfo, nullptr, &m_SwapchainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
+			WZ_CORE_ASSERT(vkCreateFramebuffer(Application::Get().GetContext()->As<VulkanContext>(), &framebufferInfo, nullptr, &m_SwapchainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
 		}
 	}
 
 	void VulkanSwapchain::CreateSyncObjects()
 	{
-		auto& context = Engine::GetContext()->As<VulkanContext>();
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
 
 		m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -404,7 +404,7 @@ namespace WhizzEngine {
 		}
 		else
 		{
-			VkExtent2D actualExtent = { Engine::GetWindow()->GetWidth(), Engine::GetWindow()->GetHeight() };
+			VkExtent2D actualExtent = { Application::Get().GetWindow()->GetWidth(), Application::Get().GetWindow()->GetHeight() };
 			actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
 			actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 			return actualExtent;
