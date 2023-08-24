@@ -12,6 +12,9 @@ namespace WhizzEngine {
 		OpenGLRendererAPI();
 		~OpenGLRendererAPI();
 
+		virtual void BeginFrame() override;
+		virtual void EndFrame() override;
+
 		virtual void Clear() const override;
 		virtual void BindPipeline(std::shared_ptr<Pipeline> pipeline) override;
 		virtual void Draw(uint32_t vertexCount) override;

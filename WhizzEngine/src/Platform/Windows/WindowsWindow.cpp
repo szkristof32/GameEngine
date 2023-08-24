@@ -51,6 +51,11 @@ namespace WhizzEngine {
 		}
 	}
 
+	void WindowsWindow::WaitForEvents() const
+	{
+		WaitMessage();
+	}
+
 	static LRESULT CALLBACK WindowProcess(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
 	{
 		switch (message)

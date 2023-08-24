@@ -19,6 +19,9 @@ namespace WhizzEngine {
 	public:
 		virtual ~RendererAPI() = default;
 
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
+
 		virtual void Clear() const = 0;
 		virtual void BindPipeline(std::shared_ptr<Pipeline> pipeline) = 0;
 		virtual void Draw(uint32_t vertexCount) = 0;

@@ -17,6 +17,14 @@ namespace WhizzEngine {
 		m_CurrentlyBoundPipeline = nullptr;
 	}
 
+	void OpenGLRendererAPI::BeginFrame()
+	{
+	}
+
+	void OpenGLRendererAPI::EndFrame()
+	{
+	}
+
 	void OpenGLRendererAPI::Clear() const
 	{
 		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);

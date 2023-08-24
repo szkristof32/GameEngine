@@ -14,7 +14,7 @@ namespace WhizzEngine {
 		VulkanSwapchain(std::shared_ptr<Swapchain> previous);
 		virtual ~VulkanSwapchain();
 
-		VkFramebuffer GetFrameBuffer(int index) { return m_SwapchainFramebuffers[index]; }
+		VkFramebuffer GetFramebuffer(int index) { return m_SwapchainFramebuffers[index]; }
 		VkRenderPass GetRenderPass() { return m_RenderPass; }
 		VkImageView GetImageView(int index) { return m_SwapchainImageViews[index]; }
 		size_t GetImageCount() { return m_SwapchainImages.size(); }
