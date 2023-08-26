@@ -17,17 +17,6 @@ externalproject "glm_static"
 	
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-
---[[
-externalproject "vk-bootstrap"
-	location "WhizzEngine/vendor/vk-bootstrap"
-	uuid "57940020-8E99-AEB6-271F-61E0C7F6B73B"
-	kind "StaticLib"
-	language "C++"
-	staticruntime "off"
-	
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 	
 externalproject "VulkanMemoryAllocator"
 	location "WhizzEngine/vendor/VMA/src"
@@ -38,4 +27,3 @@ externalproject "VulkanMemoryAllocator"
 	
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-]]--

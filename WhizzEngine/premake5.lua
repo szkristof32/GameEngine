@@ -40,7 +40,8 @@ project "WhizzEngine"
 	links
 	{
 		"Glad",
-		"spdlog"
+		"spdlog",
+		"VulkanMemoryAllocator"
 	}
 	
 	filter "system:windows"
@@ -50,11 +51,6 @@ project "WhizzEngine"
 		{
 			"opengl32.lib",
 			"vulkan-1.lib"
-		}
-	
-		postbuildcommands
-		{
-			("rmdir /s /q %{wks.location}x64")
 		}
 	
 	filter "configurations:Debug"
