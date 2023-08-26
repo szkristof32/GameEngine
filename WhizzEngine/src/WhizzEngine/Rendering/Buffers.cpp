@@ -3,7 +3,6 @@
 
 #include "WhizzEngine/Rendering/RendererAPI.h"
 #include "Platform/OpenGL/OpenGLBuffers.h"
-#include "Platform/Vulkan/VulkanBuffers.h"
 
 namespace WhizzEngine {
 
@@ -13,7 +12,7 @@ namespace WhizzEngine {
 		{
 			case RendererAPI::None:		WZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::OpenGL:	return std::make_shared<OpenGLVertexBuffer>();
-			case RendererAPI::Vulkan:	return std::make_shared<VulkanVertexBuffer>();
+			case RendererAPI::Vulkan:	WZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported!"); return nullptr;
 		}
 
 		WZ_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -26,7 +25,7 @@ namespace WhizzEngine {
 		{
 			case RendererAPI::None:		WZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 			case RendererAPI::OpenGL:	return std::make_shared<OpenGLIndexBuffer>();
-			case RendererAPI::Vulkan:	return std::make_shared<VulkanIndexBuffer>();
+			case RendererAPI::Vulkan:	WZ_CORE_ASSERT(false, "RendererAPI::Vulkan is currently not supported!"); return nullptr;
 		}
 
 		WZ_CORE_ASSERT(false, "Unknown RendererAPI!");

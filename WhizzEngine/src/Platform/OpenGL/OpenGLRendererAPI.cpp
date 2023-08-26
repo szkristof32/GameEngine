@@ -17,17 +17,9 @@ namespace WhizzEngine {
 		m_CurrentlyBoundPipeline = nullptr;
 	}
 
-	void OpenGLRendererAPI::BeginFrame()
+	void OpenGLRendererAPI::Clear() const
 	{
-	}
-
-	void OpenGLRendererAPI::EndFrame()
-	{
-	}
-
-	void OpenGLRendererAPI::Clear(float r, float g, float b, float a)
-	{
-		glClearColor(r, g, b, a);
+		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
