@@ -3,6 +3,8 @@
 #include "WhizzEngine/Core/Timing.h"
 #include "WhizzEngine/Events/Event.h"
 
+#include <memory>
+
 namespace WhizzEngine {
 
 	class Layer
@@ -14,6 +16,7 @@ namespace WhizzEngine {
 		virtual void OnAttach() = 0;
 		virtual void OnDetach() = 0;
 		virtual void OnUpdate(Timestep ts) = 0;
+		virtual void OnRender() = 0;
 		virtual void OnImGuiRender() = 0;
 		virtual void OnEvent(std::shared_ptr<Event> event) = 0;
 

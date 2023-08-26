@@ -19,7 +19,7 @@ namespace WhizzEngine {
 		std::string ReadFile(const std::string& filepath);
 		std::unordered_map<uint32_t, std::string> PreProcess(const std::string& source);
 
-		void CompileOrGetOpenGLBinaries(const std::unordered_map<uint32_t, std::string>& shaderSources);
+		void CompileOrGetOpenGLBinaries();
 		void CreateProgram();
 		void Reflect(uint32_t stage, const std::vector<uint32_t>& shaderData);
 	private:
@@ -30,6 +30,8 @@ namespace WhizzEngine {
 
 		std::unordered_map<uint32_t, std::vector<uint32_t>> m_OpenGLSPIRV;
 		std::unordered_map<uint32_t, std::string> m_OpenGLSourceCode;
+
+		friend class OpenGLUniformBuffer;
 	};
 
 }

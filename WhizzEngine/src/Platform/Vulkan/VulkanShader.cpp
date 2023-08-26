@@ -172,6 +172,7 @@ namespace WhizzEngine {
 		const bool optimise = true;
 		if (optimise)
 			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		options.AddMacroDefinition("WZ_TARGET_VULKAN");
 
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 
@@ -239,7 +240,7 @@ namespace WhizzEngine {
 		spirv_cross::Compiler compiler(shaderData);
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
-		WZ_CORE_TRACE("Shader::Reflect - {0} {1}", Utils::VKShaderStageToString(stage), m_FilePath);
+		WZ_CORE_TRACE("VulkanShader::Reflect - {0} {1}", Utils::VKShaderStageToString(stage), m_FilePath);
 		WZ_CORE_TRACE("    {0} uniform buffers", resources.uniform_buffers.size());
 		WZ_CORE_TRACE("    {0} resources", resources.sampled_images.size());
 

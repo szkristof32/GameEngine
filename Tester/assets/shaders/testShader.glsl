@@ -3,9 +3,14 @@
 
 layout (location = 0) in vec3 in_position;
 
+layout (std140, binding = 0) uniform Push
+{
+	mat4 Projection;
+} push;
+
 void main()
 {
-	gl_Position = vec4(in_position, 1.0);
+	gl_Position = push.Projection * vec4(in_position, 1.0);
 }
 
 #type fragment

@@ -53,4 +53,17 @@ namespace WhizzEngine {
 		VmaMemoryUsage m_MemoryUsage;
 	};
 
+	class VulkanUniformBuffer : public UniformBuffer
+	{
+	public:
+		VulkanUniformBuffer(uint32_t size, uint32_t binding);
+		virtual ~VulkanUniformBuffer();
+
+		virtual void SetData(uint32_t size, const void* data, uint32_t offset = 0) override;
+		VkDescriptorBufferInfo DescriptorInfo(VkDeviceSize size, VkDeviceSize offset) { return { m_Buffer, offset, size }; }
+	private:
+		VkBuffer m_Buffer;
+		VmaAllocation m_Memory;
+	};
+
 }

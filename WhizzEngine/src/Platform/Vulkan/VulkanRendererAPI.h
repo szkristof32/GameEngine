@@ -2,7 +2,9 @@
 
 #include "WhizzEngine/Rendering/RendererAPI.h"
 #include "WhizzEngine/Rendering/Swapchain.h"
+
 #include "Platform/Vulkan/VulkanCommandBuffer.h"
+#include "Platform/Vulkan/VulkanDescriptors.h"
 
 #include "WhizzEngine/Events/ApplicationEvent.h"
 

@@ -42,8 +42,14 @@ namespace WhizzEngine {
 				m_Window->Update();
 				EventBus::Update();
 
+				for (Layer* layer : m_LayerStack)
+					layer->OnUpdate(delta);
+
 				m_Lag -= MS_PER_UPDATE;
 			}
+
+			for (Layer* layer : m_LayerStack)
+				layer->OnRender();
 
 			m_Context->Swap();
 		}

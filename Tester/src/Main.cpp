@@ -1,10 +1,13 @@
 #include <WhizzEngine/EntryPoint.h>
 
+#include "TestLayer.h"
+
 class Tester : public WhizzEngine::Application
 {
 public:
 	Tester()
 	{
+		PushLayer(new TestLayer());
 	}
 
 	~Tester()

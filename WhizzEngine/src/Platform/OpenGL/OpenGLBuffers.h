@@ -18,7 +18,7 @@ namespace WhizzEngine {
 		virtual uint32_t GetDataSize() const override { return m_DataSize; }
 	private:
 		uint32_t m_RendererID;
-		uint32_t m_DataSize;
+		uint32_t m_DataSize = 0;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer
@@ -35,7 +35,18 @@ namespace WhizzEngine {
 		virtual uint32_t GetDataSize() const override { return m_DataSize; }
 	private:
 		uint32_t m_RendererID;
-		uint32_t m_DataSize;
+		uint32_t m_DataSize = 0;
+	};
+
+	class OpenGLUniformBuffer : public UniformBuffer
+	{
+	public:
+		OpenGLUniformBuffer(uint32_t size, uint32_t binding);
+		virtual ~OpenGLUniformBuffer();
+
+		virtual void SetData(uint32_t size, const void* data, uint32_t offset = 0) override;
+	private:
+		uint32_t m_RendererID;
 	};
 
 }

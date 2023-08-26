@@ -33,4 +33,17 @@ namespace WhizzEngine {
 		return nullptr;
 	}
 
+	std::shared_ptr<WhizzEngine::UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::None:		WZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+			case RendererAPI::OpenGL:	return std::make_shared<OpenGLUniformBuffer>(size, binding);
+			case RendererAPI::Vulkan:	return std::make_shared<VulkanUniformBuffer>(size, binding);
+		}
+
+		WZ_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
 }

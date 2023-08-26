@@ -3,6 +3,7 @@
 #include "WhizzEngine/Core/Core.h"
 #include "WhizzEngine/Rendering/Shader.h"
 #include "WhizzEngine/Rendering/Attributes.h"
+#include "WhizzEngine/Rendering/Buffers.h"
 
 #include <string>
 #include <memory>
@@ -13,6 +14,7 @@ namespace WhizzEngine {
 	{
 		std::string ShaderPath;
 		AttributeLayout AttribLayout;
+		std::initializer_list<std::shared_ptr<UniformBuffer>> UniformBuffers;
 	};
 
 	class Pipeline

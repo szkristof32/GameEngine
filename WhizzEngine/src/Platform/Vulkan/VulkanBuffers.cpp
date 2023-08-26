@@ -117,4 +117,33 @@ namespace WhizzEngine {
 		m_DataSize = size;
 	}
 
+	VulkanUniformBuffer::VulkanUniformBuffer(uint32_t size, uint32_t binding)
+	{
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
+
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = size;
+		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+
+		VmaAllocationCreateInfo allocInfo{};
+		allocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+
+		WZ_CORE_ASSERT(vmaCreateBuffer(context, &bufferInfo, &allocInfo, &m_Buffer, &m_Memory, nullptr) == VK_SUCCESS, "Failed to create buffer!");
+	}
+
+	VulkanUniformBuffer::~VulkanUniformBuffer()
+	{
+		vmaDestroyBuffer(Application::Get().GetContext()->As<VulkanContext>(), m_Buffer, m_Memory);
+	}
+
+	void VulkanUniformBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
+	{
+		auto& context = Application::Get().GetContext()->As<VulkanContext>();
+		void* mapped;
+		vmaMapMemory(context, m_Memory, &mapped);
+		memcpy(mapped, data, size);
+		vmaUnmapMemory(context, m_Memory);
+	}
+
 }

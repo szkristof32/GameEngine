@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "OpenGLShader.h"
 
+#include "WhizzEngine/Core/Timing.h"
+
 #include <fstream>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -28,8 +30,8 @@ namespace WhizzEngine {
 		{
 			switch (stage)
 			{
-				case GL_VERTEX_SHADER:   return shaderc_glsl_vertex_shader;
-				case GL_FRAGMENT_SHADER: return shaderc_glsl_fragment_shader;
+				case GL_VERTEX_SHADER:		return shaderc_glsl_vertex_shader;
+				case GL_FRAGMENT_SHADER:	return shaderc_glsl_fragment_shader;
 			}
 
 			WZ_CORE_ASSERT(false);
@@ -40,8 +42,8 @@ namespace WhizzEngine {
 		{
 			switch (stage)
 			{
-				case GL_VERTEX_SHADER:   return "GL_VERTEX_SHADER";
-				case GL_FRAGMENT_SHADER: return "GL_FRAGMENT_SHADER";
+				case GL_VERTEX_SHADER:		return "GL_VERTEX_SHADER";
+				case GL_FRAGMENT_SHADER:	return "GL_FRAGMENT_SHADER";
 			}
 
 			WZ_CORE_ASSERT(false);
@@ -65,8 +67,8 @@ namespace WhizzEngine {
 		{
 			switch (stage)
 			{
-				case GL_VERTEX_SHADER:    return ".cached_opengl.vert";
-				case GL_FRAGMENT_SHADER:  return ".cached_opengl.frag";
+				case GL_VERTEX_SHADER:		return ".cached_opengl.vert";
+				case GL_FRAGMENT_SHADER:	return ".cached_opengl.frag";
 			}
 
 			WZ_CORE_ASSERT(false);
@@ -81,10 +83,14 @@ namespace WhizzEngine {
 		Utils::CreateCacheDirectoryIfNeeded();
 
 		std::string source = ReadFile(filepath);
-		auto shaderSources = PreProcess(source);
+		m_OpenGLSourceCode = PreProcess(source);
 
-		CompileOrGetOpenGLBinaries(shaderSources);
-		CreateProgram();
+		{
+			Timer timer;
+			CompileOrGetOpenGLBinaries();
+			CreateProgram();
+			WZ_CORE_WARN("Shader creation took {0} ms", timer.ElapsedMillis());
+		}
 
 		// Extract name from filepath
 		auto lastSlash = filepath.find_last_of("/\\");
@@ -150,20 +156,22 @@ namespace WhizzEngine {
 		return shaderSources;
 	}
 
-	void OpenGLShader::CompileOrGetOpenGLBinaries(const std::unordered_map<uint32_t, std::string>& shaderSources)
+	void OpenGLShader::CompileOrGetOpenGLBinaries()
 	{
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
+		options.AddMacroDefinition("WZ_TARGET_OPENGL");
 		const bool optimize = true;
 		if (optimize)
 			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+
 
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 
 		auto& shaderData = m_OpenGLSPIRV;
 		shaderData.clear();
-		for (auto&& [stage, source] : shaderSources)
+		for (auto&& [stage, source] : m_OpenGLSourceCode)
 		{
 			std::filesystem::path shaderFilePath = m_FilePath;
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
@@ -235,6 +243,8 @@ namespace WhizzEngine {
 
 			for (auto id : shaderIDs)
 				glDeleteShader(id);
+
+			return;
 		}
 
 		for (auto id : shaderIDs)

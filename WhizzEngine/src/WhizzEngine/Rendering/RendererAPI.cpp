@@ -6,8 +6,8 @@
 
 namespace WhizzEngine {
 
-	RendererAPI::API RendererAPI::s_API = RendererAPI::API::Vulkan;
-
+	RendererAPI::API RendererAPI::s_API = RendererAPI::API::OpenGL;
+	
 	std::shared_ptr<RendererAPI> RendererAPI::Create()
 	{
 		switch (s_API)

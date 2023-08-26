@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "OpenGLBuffers.h"
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include <glad/glad.h>
 
 namespace WhizzEngine {
@@ -33,6 +35,7 @@ namespace WhizzEngine {
 
 	void OpenGLVertexBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
 	{
+		if (size > m_DataSize) AllocateData(size);
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
@@ -64,7 +67,25 @@ namespace WhizzEngine {
 
 	void OpenGLIndexBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
 	{
+		if (size > m_DataSize) AllocateData(size);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+	}
+
+	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, uint32_t binding)
+	{
+		glCreateBuffers(1, &m_RendererID);
+		glNamedBufferData(m_RendererID, size, nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, m_RendererID);
+	}
+
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &m_RendererID);
+	}
+
+	void OpenGLUniformBuffer::SetData(uint32_t size, const void* data, uint32_t offset)
+	{
+		glNamedBufferSubData(m_RendererID, offset, size, data);
 	}
 
 }
