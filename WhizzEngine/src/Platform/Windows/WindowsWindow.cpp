@@ -31,7 +31,8 @@ namespace WhizzEngine {
 		std::wstring w_title = std::wstring(title.begin(), title.end());
 
 		m_Window = CreateWindowEx(0, CLASS_NAME, w_title.c_str(), WS_OVERLAPPEDWINDOW, (displayWidth - width) / 2, (displayHeight - height) / 2, width, height, nullptr, nullptr, GetModuleHandle(NULL), nullptr);
-		WZ_CORE_ASSERT(m_Window, "Failed to create window!");
+		if (!m_Window)
+			exit(-1);
 
 		ShowWindow(m_Window, SW_SHOW);
 	}
@@ -48,11 +49,6 @@ namespace WhizzEngine {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-	}
-
-	void WindowsWindow::WaitForEvents() const
-	{
-		WaitMessage();
 	}
 
 	static LRESULT CALLBACK WindowProcess(HWND window, UINT message, WPARAM wparam, LPARAM lparam)

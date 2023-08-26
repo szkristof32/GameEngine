@@ -64,7 +64,6 @@ namespace WhizzEngine {
 		void AddAttributes(const AttributeLayout& attributeLayout);
 
 		uint32_t GetStride() const { return m_Stride; }
-		uint32_t Count() const { return (uint32_t)m_Attributes.size(); }
 
 		bool operator==(const AttributeLayout& other) const
 		{

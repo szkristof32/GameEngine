@@ -17,7 +17,6 @@ namespace WhizzEngine {
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
 		virtual const void* GetNativeHandle() const override { return m_Window; }
-		virtual void WaitForEvents() const override;
 	private:
 		HWND m_Window;
 		uint32_t m_Width;
