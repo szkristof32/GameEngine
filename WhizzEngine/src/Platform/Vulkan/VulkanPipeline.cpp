@@ -6,6 +6,7 @@
 #include "Platform/Vulkan/VulkanRendererAPI.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanBuffers.h"
 
 namespace WhizzEngine {
 
@@ -154,10 +155,12 @@ namespace WhizzEngine {
 		dynamicStateInfo.dynamicStateCount = (uint32_t)dynamicStates.size();
 		dynamicStateInfo.pDynamicStates = dynamicStates.data();
 
+		VkDescriptorSetLayout layouts[] = { pipelineInfo.UniformBuffers[0]->As<VulkanUniformBuffer>().GetDescriptorSetLayout()->As<VulkanDescriptorSetLayout>() };
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = (uint32_t)pipelineInfo.UniformBuffers.size();
-		pipelineLayoutInfo.pSetLayouts = nullptr;
+		pipelineLayoutInfo.pSetLayouts = layouts;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 
 		WZ_CORE_ASSERT(vkCreatePipelineLayout(context, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) == VK_SUCCESS, "Failed to create pipeline layout!");

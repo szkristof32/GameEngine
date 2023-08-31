@@ -14,7 +14,7 @@ namespace WhizzEngine {
 	{
 		std::string ShaderPath;
 		AttributeLayout AttribLayout;
-		std::initializer_list<std::shared_ptr<UniformBuffer>> UniformBuffers;
+		std::vector<std::shared_ptr<UniformBuffer>> UniformBuffers;
 	};
 
 	class Pipeline

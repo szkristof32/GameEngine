@@ -1,81 +1,56 @@
 #pragma once
 
+#include "WhizzEngine/Rendering/Descriptors.h"
 #include "WhizzEngine/Rendering/Buffers.h"
 
 #include <vulkan/vulkan.h>
 
 namespace WhizzEngine {
 
-	class VulkanDescriptorSetLayout
+	class VulkanDescriptorSetLayout : public DescriptorSetLayout
 	{
 	public:
-		class Builder
-		{
-		public:
-			Builder() {}
+		VulkanDescriptorSetLayout() = default;
+		virtual ~VulkanDescriptorSetLayout();
 
-			Builder& AddBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t count = 1);
-			std::unique_ptr<VulkanDescriptorSetLayout> Build() const;
-		private:
-			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings{};
-		};
-
-		VulkanDescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
-		~VulkanDescriptorSetLayout();
+		virtual void AddBinding(DescriptorType type, ShaderStage stage) override;
 
 		VkDescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 		operator VkDescriptorSetLayout() const { return m_DescriptorSetLayout; }
 	private:
-		VkDescriptorSetLayout m_DescriptorSetLayout;
+		void RecreateLayout();
+	private:
+		VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings;
-
-		friend class VulkanDescriptorWriter;
 	};
 
-	class VulkanDescriptorPool
+	class VulkanDescriptorPool : public DescriptorPool
 	{
 	public:
-		class Builder
-		{
-		public:
-			Builder() {}
+		VulkanDescriptorPool() = default;
+		virtual ~VulkanDescriptorPool();
 
-			Builder& AddPoolSize(VkDescriptorType descriptorType, uint32_t count);
-			Builder& SetPoolFlags(VkDescriptorPoolCreateFlags flags);
-			Builder& SetMaxSets(uint32_t count);
-			std::unique_ptr<VulkanDescriptorPool> Build() const;
-		private:
-			std::vector<VkDescriptorPoolSize> m_PoolSizes{};
-			uint32_t m_MaxSets = 1000;
-			VkDescriptorPoolCreateFlags m_PoolFlags = 0;
-		};
+		virtual void AddPoolType(DescriptorType type, uint32_t count) override;
 
-		VulkanDescriptorPool(uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes);
-		~VulkanDescriptorPool();
-
-		bool AllocateDescriptor(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
-		void FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
-		void ResetPool();
+		virtual std::shared_ptr<DescriptorSet> AllocateDescriptor(std::shared_ptr<DescriptorSetLayout> layout) const override;
+		virtual void FreeDescriptors(std::vector<DescriptorSet>& descriptors) const override;
+		virtual void Reset() override;
+	private:
+		void RecreatePool();
 	private:
 		VkDescriptorPool m_DescriptorPool;
-
-		friend class VulkanDescriptorWriter;
+		std::vector<VkDescriptorPoolSize> m_PoolSizes;
 	};
 
-	class VulkanDescriptorWriter
+	class VulkanDescriptorSet : public DescriptorSet
 	{
 	public:
-		VulkanDescriptorWriter(VulkanDescriptorSetLayout& setLayout, VulkanDescriptorPool& pool);
+		VulkanDescriptorSet(VkDescriptorSet descriptorSet);
+		virtual ~VulkanDescriptorSet() = default;
 
-		VulkanDescriptorWriter& WriteBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-		VulkanDescriptorWriter& WriteImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
-
-		bool Build(VkDescriptorSet& set);
-		void Overwrite(VkDescriptorSet& set);
+		virtual void Bind(std::shared_ptr<Pipeline> pipeline, std::vector<uint32_t> dynamicOffsets = {}) override;
 	private:
-		VulkanDescriptorSetLayout& m_SetLayout;
-		VulkanDescriptorPool& m_Pool;
-		std::vector<VkWriteDescriptorSet> m_Writes;
+		VkDescriptorSet m_DescriptorSet;
 	};
 
 }

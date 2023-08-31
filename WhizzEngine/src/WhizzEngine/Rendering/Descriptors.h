@@ -18,20 +18,34 @@ namespace WhizzEngine {
 		VertexShader = 0x1,
 		FragmentShader = 0x2,
 		GeomertyShader = 0x4
+
 	};
+	
+	constexpr int operator&(ShaderStage a, ShaderStage b)
+	{
+		return (int)a & (int)b;
+	}
+	constexpr ShaderStage operator|(ShaderStage a, ShaderStage b)
+	{
+		return (ShaderStage)((int)a | (int)b);
+	}
 
 	class DescriptorSet
 	{
 	public:
 		virtual ~DescriptorSet() = default;
 
-		virtual void Bind(std::shared_ptr<Pipeline> pipeline, std::initializer_list<uint32_t> dynamicOffsets = {}) = 0;
+		WZ_CAST_TO(DescriptorSet);
+
+		virtual void Bind(std::shared_ptr<Pipeline> pipeline, std::vector<uint32_t> dynamicOffsets = {}) = 0;
 	};
 
 	class DescriptorSetLayout
 	{
 	public:
 		virtual ~DescriptorSetLayout() = default;
+
+		WZ_CAST_TO(DescriptorSetLayout);
 
 		virtual void AddBinding(DescriptorType type, ShaderStage stage) = 0;
 
@@ -42,6 +56,8 @@ namespace WhizzEngine {
 	{
 	public:
 		virtual ~DescriptorPool() = default;
+
+		WZ_CAST_TO(DescriptorPool);
 
 		virtual void AddPoolType(DescriptorType type, uint32_t count) = 0;
 

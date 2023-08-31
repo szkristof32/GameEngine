@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WhizzEngine/Rendering/Buffers.h"
+#include "WhizzEngine/Rendering/Descriptors.h"
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
@@ -61,9 +62,15 @@ namespace WhizzEngine {
 
 		virtual void SetData(uint32_t size, const void* data, uint32_t offset = 0) override;
 		VkDescriptorBufferInfo DescriptorInfo(VkDeviceSize size, VkDeviceSize offset) { return { m_Buffer, offset, size }; }
+		std::shared_ptr<DescriptorSetLayout> GetDescriptorSetLayout() const { return m_SetLayout; }
+		std::shared_ptr<DescriptorSet> GetDescriptorSet() const { return m_Descriptor; }
 	private:
 		VkBuffer m_Buffer;
 		VmaAllocation m_Memory;
+		std::shared_ptr<DescriptorSetLayout> m_SetLayout = nullptr;
+		std::shared_ptr<DescriptorSet> m_Descriptor = nullptr;
+
+		static std::shared_ptr<DescriptorPool> s_UniformDescriptorPool;
 	};
 
 }
